@@ -1,7 +1,7 @@
 '''
-A library that allows simple access to 74HC595 shift registers on a Raspberry Pi using any digital I/O pins.
+A library that allows simple access to 74HC595 shift registers on a Raspberry
+Pi using any digital I/O pins.
 '''
-
 
 import RPi.GPIO as GPIO
 from time import sleep
@@ -12,21 +12,25 @@ version = "0.2"
 version_info = (0, 2)
 
 # Define MODES
-ALL  = -1
+ALL = -1
 HIGH = 1
-LOW  = 0
+LOW = 0
+
 
 class Shiftpi:
     def __init__(self):
         # Define pins
-        self._SER_pin   = 25    #pin 14 on the 75HC595
-        self._RCLK_pin  = 24    #pin 12 on the 75HC595
-        self._SRCLK_pin = 23   #pin 11 on the 75HC595
+        self._SER_pin = 25      # pin 14 on the 75HC595
+        self._RCLK_pin = 24     # pin 12 on the 75HC595
+        self._SRCLK_pin = 23    # pin 11 on the 75HC595
 
         # is used to store states of all pins
         self._registers = list()
 
-        #How many of the shift registers - you can change them with shiftRegisters method
+        '''
+        How many of the shift registers - you can change them with
+        shiftRegisters method
+        '''
         self._number_of_shiftregisters = 1
         self.pinsSetup()
 
@@ -34,7 +38,6 @@ class Shiftpi:
         '''
         Allows the user to define custom pins
         '''
-
         custompins = 0
         serpin = self._SER_pin
         rclkpin = self._RCLK_pin
@@ -48,7 +51,9 @@ class Shiftpi:
             self._SRCLK_pin = kwargs.get('srclk', self._SRCLK_pin)
 
         if custompins:
-            if self._SER_pin != serpin or self._RCLK_pin != rclkpin or self._SRCLK_pin != srclkpin:
+            if ((self._SER_pin != serpin or
+                 self._RCLK_pin != rclkpin or
+                 self._SRCLK_pin != srclkpin)):
                 GPIO.setwarnings(True)
         else:
             GPIO.setwarnings(False)
@@ -57,23 +62,25 @@ class Shiftpi:
         GPIO.setup(self._RCLK_pin, GPIO.OUT)
         GPIO.setup(self._SRCLK_pin, GPIO.OUT)
 
-    def startupMode(self, mode, execute = False):
+    def startupMode(self, mode, execute=False):
         '''
-        Allows the user to change the default state of the shift registers outputs
+        Allows the user to change the default state of the shift registers
+        outputs
         '''
         if isinstance(mode, int):
             if mode is HIGH or mode is LOW:
                 self._all(mode, execute)
             else:
-                raise ValueError("The mode can be only HIGH or LOW or Dictionary with specific pins and modes")
+                raise ValueError('''The mode can be only HIGH or LOW or
+                    Dictionary with specific pins and modes''')
         elif isinstance(mode, dict):
             for pin, mode in mode.iteritems():
                 self._setPin(pin, mode)
             if execute:
                 self._execute()
         else:
-            raise ValueError("The mode can be only HIGH or LOW or Dictionary with specific pins and modes")
-
+            raise ValueError('''The mode can be only HIGH or LOW or Dictionary
+                with specific pins and modes''')
 
     def shiftRegisters(self, num):
         '''
@@ -105,7 +112,7 @@ class Shiftpi:
     def _all_pins(self):
         return self._number_of_shiftregisters * 8
 
-    def _all(self, mode, execute = True):
+    def _all(self, mode, execute=True):
         all_shr = self._all_pins()
 
         for pin in range(0, all_shr):
@@ -125,7 +132,7 @@ class Shiftpi:
         all_pins = self._all_pins()
         GPIO.output(self._RCLK_pin, GPIO.LOW)
 
-        for pin in range(all_pins -1, -1, -1):
+        for pin in range(all_pins - 1, -1, -1):
             GPIO.output(self._SRCLK_pin, GPIO.LOW)
 
             pin_mode = self._registers[pin]
