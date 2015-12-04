@@ -3,10 +3,9 @@ A library that allows simple access to 74HC595 shift registers on a Raspberry
 Pi using any digital I/O pins.
 '''
 
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 from time import sleep
 
-GPIO.setmode(GPIO.BCM)
 
 version = "0.2"
 version_info = (0, 2)
@@ -16,9 +15,15 @@ ALL = -1
 HIGH = 1
 LOW = 0
 
-
 class Shiftpi:
-    def __init__(self):
+    def __init__(self, GPIO=None):
+	
+        if GPIO is None:
+            import RPi.GPIO as GPIO
+        self.GPIO = GPIO
+
+        self.GPIO.setmode(self.GPIO.BCM)
+
         # Define pins
         self._SER_pin = 25      # pin 14 on the 75HC595
         self._RCLK_pin = 24     # pin 12 on the 75HC595
@@ -54,13 +59,13 @@ class Shiftpi:
             if ((self._SER_pin != serpin or
                  self._RCLK_pin != rclkpin or
                  self._SRCLK_pin != srclkpin)):
-                GPIO.setwarnings(True)
+                self.GPIO.setwarnings(True)
         else:
-            GPIO.setwarnings(False)
+            self.GPIO.setwarnings(False)
 
-        GPIO.setup(self._SER_pin, GPIO.OUT)
-        GPIO.setup(self._RCLK_pin, GPIO.OUT)
-        GPIO.setup(self._SRCLK_pin, GPIO.OUT)
+        self.GPIO.setup(self._SER_pin, self.GPIO.OUT)
+        self.GPIO.setup(self._RCLK_pin, self.GPIO.OUT)
+        self.GPIO.setup(self._SRCLK_pin, self.GPIO.OUT)
 
     def startupMode(self, mode, execute=False):
         '''
@@ -130,14 +135,14 @@ class Shiftpi:
 
     def _execute(self):
         all_pins = self._all_pins()
-        GPIO.output(self._RCLK_pin, GPIO.LOW)
+        self.GPIO.output(self._RCLK_pin, self.GPIO.LOW)
 
         for pin in range(all_pins - 1, -1, -1):
-            GPIO.output(self._SRCLK_pin, GPIO.LOW)
+            self.GPIO.output(self._SRCLK_pin, self.GPIO.LOW)
 
             pin_mode = self._registers[pin]
 
-            GPIO.output(self._SER_pin, pin_mode)
-            GPIO.output(self._SRCLK_pin, GPIO.HIGH)
+            self.GPIO.output(self._SER_pin, pin_mode)
+            self.GPIO.output(self._SRCLK_pin, self.GPIO.HIGH)
 
-        GPIO.output(self._RCLK_pin, GPIO.HIGH)
+        self.GPIO.output(self._RCLK_pin, self.GPIO.HIGH)
