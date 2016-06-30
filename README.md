@@ -43,7 +43,8 @@ or you can use the library methods as shown in the first example, with importing
 
     digitalWrite(ALL, HIGH)
 
-That's it! :)
+
+Check out the binary counter example program (binCount.py) 
 
 # The API look and feel
 
